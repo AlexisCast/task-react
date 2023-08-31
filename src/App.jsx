@@ -5,7 +5,7 @@ import Profile from './Components/Profile';
 
 import { ButtonT } from './TailwindComponents';
 
-import { dummyTasks, dummyUser, dummyHelloWorld } from './__mock__/data.js';
+// import { dummyTasks, dummyUser, dummyHelloWorld } from './__mock__/data.js';
 
 // API URL
 const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -14,47 +14,102 @@ function App() {
   const [message, setMessage] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchHelloWorld();
   }, []);
 
+  useEffect(() => {
+    if (error == null) {
+      return;
+    }
+    alert(error);
+  }, [error]);
+
   const fetchHelloWorld = async () => {
-    const response = await fetch(`${baseUrl}/`);
-    const data = await response.json();
-    setMessage(data.text);
+    try {
+      const response = await fetch(`${baseUrl}/`);
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        console.log(await response);
+        throw new Error(
+          await `
+          Message: ${errorMessage.error}
+          Status: ${response.status}
+          URL: ${response.url}`
+        );
+      }
+      const data = await response.json();
+      setMessage(data.text);
+    } catch (error) {
+      setMessage('There was an error please reload...');
+      setError(error);
+    }
   };
 
   const fetchTaskHandler = async () => {
+    setError(null);
     // Replace with your actual Bearer token
     const token =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVkMmQ1ODRmZTM5NjY4YWMxZTAxOWIiLCJpYXQiOjE2OTM1MTQ1MTZ9.wmbqDr6Fwr-rybAsKgAgkZsjuLJEonGfVpZILrjyAPw';
-    const response = await fetch(`${baseUrl}/tasks`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+
+    try {
+      const response = await fetch(`${baseUrl}/tasks`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        console.log(await response);
+        throw new Error(
+          await `
+          Message: ${errorMessage.error}
+          Status: ${response.status}
+          URL: ${response.url}`
+        );
       }
-    });
-    const data = await response.json();
-    console.log(data);
-    setTasks(data);
+      const data = await response.json();
+      console.log(data);
+      setTasks(data);
+    } catch (error) {
+      setError(error);
+    }
   };
 
   const fetchProfileHandler = async () => {
+    setError(null);
     // Replace with your actual Bearer token
     const token =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVkMmQ1ODRmZTM5NjY4YWMxZTAxOWIiLCJpYXQiOjE2OTM1MTQ1MTZ9.wmbqDr6Fwr-rybAsKgAgkZsjuLJEonGfVpZILrjyAPw';
-    const response = await fetch(`${baseUrl}/users/me`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+
+    try {
+      const response = await fetch(`${baseUrl}/users/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        console.log(await response);
+        throw new Error(
+          await `
+          Message: ${errorMessage.error}
+          Status: ${response.status}
+          URL: ${response.url}`
+        );
       }
-    });
-    const data = await response.json();
-    console.log(data);
-    setUser(data);
+      const data = await response.json();
+      console.log(data);
+      setUser(data);
+    } catch (error) {
+      setError(error);
+    }
   };
 
   const resetHandler = () => {
