@@ -188,6 +188,7 @@ function App() {
     setTasks([]);
     setUser(null);
     setNewUser(null);
+    setNewTask(null);
   };
 
   const headerTitle = message == null ? <h1>Loading...</h1> : <h1>{message}</h1>;
