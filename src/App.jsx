@@ -5,40 +5,115 @@ import Profile from './Components/Profile';
 
 import { ButtonT } from './TailwindComponents';
 
-import { dummyTasks, dummyUser, dummyHelloWorld } from './__mock__/data.js';
+// import { dummyTasks, dummyUser, dummyHelloWorld } from './__mock__/data.js';
 
 // API URL
-// const baseUrl = import.meta.env.VITE_BASE_URL;
+const baseUrl = import.meta.env.VITE_BASE_URL;
 
 function App() {
   const [message, setMessage] = useState(null);
-  const [task, setTask] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchHelloWorld();
-    console.log(dummyHelloWorld);
   }, []);
 
+  useEffect(() => {
+    if (error == null) {
+      return;
+    }
+    alert(error);
+  }, [error]);
+
   const fetchHelloWorld = async () => {
-    setTimeout(async () => {
-      console.log('This will be shown after 3 second');
-      await setMessage(dummyHelloWorld.text);
-    }, 3000);
+    try {
+      const response = await fetch(`${baseUrl}/`);
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        console.log(await response);
+        throw new Error(
+          await `
+          Message: ${errorMessage.error}
+          Status: ${response.status}
+          URL: ${response.url}`
+        );
+      }
+      const data = await response.json();
+      setMessage(data.text);
+    } catch (error) {
+      setMessage('There was an error please reload...');
+      setError(error);
+    }
   };
 
-  const fetchTaskHandler = () => {
-    setTask(dummyTasks.text);
-    console.log(task);
+  const fetchTaskHandler = async () => {
+    setError(null);
+    // Replace with your actual Bearer token
+    const token =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVkMmQ1ODRmZTM5NjY4YWMxZTAxOWIiLCJpYXQiOjE2OTM1MTQ1MTZ9.wmbqDr6Fwr-rybAsKgAgkZsjuLJEonGfVpZILrjyAPw';
+
+    try {
+      const response = await fetch(`${baseUrl}/tasks`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        console.log(await response);
+        throw new Error(
+          await `
+          Message: ${errorMessage.error}
+          Status: ${response.status}
+          URL: ${response.url}`
+        );
+      }
+      const data = await response.json();
+      console.log(data);
+      setTasks(data);
+    } catch (error) {
+      setError(error);
+    }
   };
 
-  const fetchProfileHandler = () => {
-    setUser(dummyUser);
-    console.log(user);
+  const fetchProfileHandler = async () => {
+    setError(null);
+    // Replace with your actual Bearer token
+    const token =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVkMmQ1ODRmZTM5NjY4YWMxZTAxOWIiLCJpYXQiOjE2OTM1MTQ1MTZ9.wmbqDr6Fwr-rybAsKgAgkZsjuLJEonGfVpZILrjyAPw';
+
+    try {
+      const response = await fetch(`${baseUrl}/users/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        console.log(await response);
+        throw new Error(
+          await `
+          Message: ${errorMessage.error}
+          Status: ${response.status}
+          URL: ${response.url}`
+        );
+      }
+      const data = await response.json();
+      console.log(data);
+      setUser(data);
+    } catch (error) {
+      setError(error);
+    }
   };
 
   const resetHandler = () => {
-    setTask([]);
+    setTasks([]);
     setUser(null);
   };
 
@@ -46,7 +121,7 @@ function App() {
 
   return (
     <div className="container mx-auto mt-20">
-      <header className="flex justify-center pb-5">{headerTitle}</header>
+      <header className="flex justify-center py-5">{headerTitle}</header>
       <ButtonT
         className="hover:!bg-red-600 mx-2"
         size="md"
@@ -54,24 +129,38 @@ function App() {
         onClick={resetHandler}>
         Reset
       </ButtonT>
-      <section className="flex flex-wrap pt-5">
+      <section className="flex flex-wrap py-5">
         <ButtonT
-          className="hover:!bg-blue-600 mx-2"
+          className="!bg-[#00cc66] hover:!bg-[#008040] mx-2"
           size="md"
           variant="primary"
           onClick={fetchProfileHandler}>
           Get Profile
         </ButtonT>
         <ButtonT
-          className="hover:!bg-blue-600 mx-2"
+          className="!bg-[#00cc66] hover:!bg-[#008040] mx-2"
           size="md"
           variant="primary"
           onClick={fetchTaskHandler}>
           Get Tasks
         </ButtonT>
       </section>
-      <section>{task.length > 0 && <TaskList tasks={task} />}</section>
-      <section>{user != null && <Profile user={user} />}</section>
+      <section className='py-5"'>
+        {user != null && (
+          <div>
+            <h1>Profile</h1>
+            <Profile user={user} />
+          </div>
+        )}
+      </section>
+      <section className='py-5"'>
+        {tasks.length > 0 && (
+          <div>
+            <h1>Tasks</h1>
+            <TaskList tasks={tasks} />
+          </div>
+        )}
+      </section>
     </div>
   );
 }
