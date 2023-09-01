@@ -65,9 +65,11 @@ function App() {
 
   const fetchTaskHandler = async () => {
     setError(null);
-    // Replace with your actual Bearer token
-    const token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVkMmQ1ODRmZTM5NjY4YWMxZTAxOWIiLCJpYXQiOjE2OTM1MTQ1MTZ9.wmbqDr6Fwr-rybAsKgAgkZsjuLJEonGfVpZILrjyAPw';
+
+    const storedData = sessionStorage.getItem('userData');
+    const userData = JSON.parse(storedData);
+
+    const token = userData.token;
 
     try {
       const response = await fetch(`${baseUrl}/tasks`, {
@@ -96,9 +98,11 @@ function App() {
 
   const fetchProfileHandler = async () => {
     setError(null);
-    // Replace with your actual Bearer token
-    const token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVkMmQ1ODRmZTM5NjY4YWMxZTAxOWIiLCJpYXQiOjE2OTM1MTQ1MTZ9.wmbqDr6Fwr-rybAsKgAgkZsjuLJEonGfVpZILrjyAPw';
+
+    const storedData = sessionStorage.getItem('userData');
+    const userData = JSON.parse(storedData);
+
+    const token = userData.token;
 
     try {
       const response = await fetch(`${baseUrl}/users/me`, {
@@ -148,6 +152,7 @@ function App() {
       const data = await response.json();
       console.log(data);
       setNewUser(data);
+      sessionStorage.setItem('userData', JSON.stringify(data));
     } catch (error) {
       setError(error);
     }
@@ -155,13 +160,11 @@ function App() {
 
   const addTaskHandler = async () => {
     setError(null);
-    // Replace with your actual Bearer token
-    const token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGYxMTE4NzJiODY2MWUzNTE5OWRiZTQiLCJpYXQiOjE2OTM1MjAyNjN9.yv37iHhsaxNYQUjXg8IQf5sHxzJb1zgSMlA7qttWSV0';
-    const newTask = {
-      description: 'my new task',
-      completed: false
-    };
+
+    const storedData = sessionStorage.getItem('userData');
+    const userData = JSON.parse(storedData);
+
+    const token = userData.token;
 
     try {
       const response = await fetch(`${baseUrl}/tasks`, {
@@ -170,7 +173,7 @@ function App() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(newTask)
+        body: jsonData
       });
       console.log(await response);
       if (!response.ok) {

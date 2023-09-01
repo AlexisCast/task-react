@@ -2,7 +2,7 @@ import Task from './Task';
 
 const TaskList = (props) => {
   return (
-    <ul className="flex flex-wrap">
+    <ul className="flex flex-wrap justify-evenly ">
       {props.tasks.map((task, index) => {
         const { _id, description, completed, owner } = task;
         return (
