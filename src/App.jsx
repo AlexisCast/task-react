@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 
 import TaskList from './Components/TaskList';
 import Profile from './Components/Profile';
+import useHttps from './hooks/use-https';
 
 import { ButtonT } from './TailwindComponents';
 
@@ -18,15 +19,26 @@ function App() {
     "email": "John@mail.com"
   }`;
 
+  const { isLoading, error, sendRequest: sendRequest } = useHttps();
+
+  const [userData, setUserData] = useState({ user: { name: 'test' } });
   const [message, setMessage] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
   const [newUser, setNewUser] = useState(null);
   const [newTask, setNewTask] = useState(null);
 
   const [inputValue, setInputValue] = useState(defaultJson);
   const [jsonData, setJsonData] = useState('');
+
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    } else {
+      setUserData(null);
+    }
+  }, []);
 
   useEffect(() => {
     fetchHelloWorld();
@@ -40,157 +52,117 @@ function App() {
     if (error == null) {
       return;
     }
+
     alert(error);
   }, [error]);
 
   const fetchHelloWorld = async () => {
-    try {
-      const response = await fetch(`${baseUrl}/`);
-      if (!response.ok) {
-        const errorMessage = await response.json();
-        throw new Error(
-          await `
-          Message: ${errorMessage.error}
-          Status: ${response.status}
-          URL: ${response.url}`
-        );
-      }
-      const data = await response.json();
-      setMessage(data.text);
-    } catch (error) {
-      setMessage('There was an error please reload...');
-      setError(error);
-    }
+    const saveMessage = (object) => {
+      setMessage(object.text);
+    };
+
+    sendRequest(
+      {
+        url: `${baseUrl}/`
+      },
+      saveMessage
+    );
   };
 
-  const fetchTaskHandler = async () => {
-    setError(null);
+  const fetchTasksHandler = async () => {
+    const saveTask = (object) => {
+      setTasks(object);
+    };
 
-    const storedData = sessionStorage.getItem('userData');
-    const userData = JSON.parse(storedData);
-
-    const token = userData.token;
-
-    try {
-      const response = await fetch(`${baseUrl}/tasks`, {
+    sendRequest(
+      {
+        url: `${baseUrl}/tasks`,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${userData.token}`
         }
-      });
-      if (!response.ok) {
-        const errorMessage = await response.json();
-        throw new Error(
-          await `
-          Message: ${errorMessage.error}
-          Status: ${response.status}
-          URL: ${response.url}`
-        );
-      }
-      const data = await response.json();
-      console.log(data);
-      setTasks(data);
-    } catch (error) {
-      setError(error);
-    }
+      },
+      saveTask
+    );
   };
 
   const fetchProfileHandler = async () => {
-    setError(null);
+    const saveUser = (object) => {
+      console.log('fetchProfileHandler');
+      console.log(object);
+      setUser(object);
+    };
 
-    const storedData = sessionStorage.getItem('userData');
-    const userData = JSON.parse(storedData);
-
-    const token = userData.token;
-
-    try {
-      const response = await fetch(`${baseUrl}/users/me`, {
+    sendRequest(
+      {
+        url: `${baseUrl}/users/me`,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${userData.token}`
         }
-      });
-      if (!response.ok) {
-        const errorMessage = await response.json();
-        throw new Error(
-          await `
-          Message: ${errorMessage.error}
-          Status: ${response.status}
-          URL: ${response.url}`
-        );
-      }
-      const data = await response.json();
-      console.log(data);
-      setUser(data);
-    } catch (error) {
-      setError(error);
-    }
+      },
+      saveUser
+    );
   };
 
-  const addUserHandler = async () => {
-    setError(null);
+  const logInUserHandler = async () => {
+    const saveLogInUser = (object) => {
+      setUserData(object);
+      localStorage.setItem('userData', JSON.stringify(object));
+    };
 
-    try {
-      const response = await fetch(`${baseUrl}/users`, {
+    sendRequest(
+      {
+        url: `${baseUrl}/users/login`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: jsonData
-      });
-      if (!response.ok) {
-        const errorMessage = await response.json();
-        throw new Error(
-          await `
-          Message: ${errorMessage.error || 'Error on Creating User'}
-          Status: ${response.status}
-          URL: ${response.url}`
-        );
-      }
-      const data = await response.json();
-      console.log(data);
-      setNewUser(data);
-      sessionStorage.setItem('userData', JSON.stringify(data));
-    } catch (error) {
-      setError(error);
-    }
+      },
+      saveLogInUser
+    );
+  };
+
+  const addUserHandler = async () => {
+    const saveAddUser = (object) => {
+      setNewUser(object);
+      setUserData(object);
+      localStorage.setItem('userData', JSON.stringify(object));
+    };
+
+    sendRequest(
+      {
+        url: `${baseUrl}/users`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: jsonData
+      },
+      saveAddUser
+    );
   };
 
   const addTaskHandler = async () => {
-    setError(null);
+    const saveTask = (object) => {
+      setNewTask(object);
+    };
 
-    const storedData = sessionStorage.getItem('userData');
-    const userData = JSON.parse(storedData);
-
-    const token = userData.token;
-
-    try {
-      const response = await fetch(`${baseUrl}/tasks`, {
+    sendRequest(
+      {
+        url: `${baseUrl}/tasks`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${userData.token}`
         },
         body: jsonData
-      });
-      console.log(await response);
-      if (!response.ok) {
-        const errorMessage = await response.json();
-        throw new Error(
-          await `
-          Message: ${errorMessage.error || 'Error on Creating User'}
-          Status: ${response.status}
-          URL: ${response.url}`
-        );
-      }
-      const data = await response.json();
-      console.log(data);
-      setNewTask(data);
-    } catch (error) {
-      setError(error);
-    }
+      },
+      saveTask
+    );
   };
 
   const resetHandler = () => {
@@ -217,10 +189,12 @@ function App() {
   };
 
   const headerTitle = message == null ? <h1>Loading...</h1> : <h1>{message}</h1>;
+  const LoggedUser = userData == null ? <h1>Need to Log In</h1> : <h1>{userData.user.name}</h1>;
 
   return (
     <div className="container mx-auto mt-20">
-      <header className="flex justify-center py-5">{headerTitle}</header>
+      <div className="flex justify-center py-5">{headerTitle}</div>
+      <div className="flex justify-center py-5">{LoggedUser}</div>
       <ButtonT
         className="hover:!bg-red-600 mx-2"
         size="md"
@@ -247,6 +221,13 @@ function App() {
           className="!bg-[#cca300] hover:!bg-[#806600] mx-2"
           size="md"
           variant="primary"
+          onClick={logInUserHandler}>
+          Log In
+        </ButtonT>
+        <ButtonT
+          className="!bg-[#cca300] hover:!bg-[#806600] mx-2"
+          size="md"
+          variant="primary"
           onClick={addUserHandler}>
           Create User
         </ButtonT>
@@ -258,17 +239,17 @@ function App() {
           Create Task
         </ButtonT>
         <ButtonT
-          className="!bg-[#00cc66] hover:!bg-[#008040] mx-2"
+          className="!bg-[#00CC66] hover:!bg-[#008040] mx-2"
           size="md"
           variant="primary"
           onClick={fetchProfileHandler}>
           Get Profile
         </ButtonT>
         <ButtonT
-          className="!bg-[#00cc66] hover:!bg-[#008040] mx-2"
+          className="!bg-[#00CC66] hover:!bg-[#008040] mx-2"
           size="md"
           variant="primary"
-          onClick={fetchTaskHandler}>
+          onClick={fetchTasksHandler}>
           Get Tasks
         </ButtonT>
       </section>
