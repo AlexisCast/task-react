@@ -21,7 +21,7 @@ function App() {
 
   const { isLoading, error, sendRequest: sendRequest } = useHttps();
 
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState({ user: { name: 'test' } });
   const [message, setMessage] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
@@ -34,11 +34,8 @@ function App() {
   useEffect(() => {
     const storedUserData = localStorage.getItem('userData');
     if (storedUserData) {
-      console.log('if');
       setUserData(JSON.parse(storedUserData));
     } else {
-      console.log('else');
-      localStorage.setItem('userData', JSON.stringify({ token: null }));
       setUserData(null);
     }
   }, []);
@@ -92,6 +89,8 @@ function App() {
 
   const fetchProfileHandler = async () => {
     const saveUser = (object) => {
+      console.log('fetchProfileHandler');
+      console.log(object);
       setUser(object);
     };
 
@@ -108,9 +107,29 @@ function App() {
     );
   };
 
+  const logInUserHandler = async () => {
+    const saveLogInUser = (object) => {
+      setUserData(object);
+      localStorage.setItem('userData', JSON.stringify(object));
+    };
+
+    sendRequest(
+      {
+        url: `${baseUrl}/users/login`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: jsonData
+      },
+      saveLogInUser
+    );
+  };
+
   const addUserHandler = async () => {
     const saveAddUser = (object) => {
       setNewUser(object);
+      setUserData(object);
       localStorage.setItem('userData', JSON.stringify(object));
     };
 
@@ -170,10 +189,12 @@ function App() {
   };
 
   const headerTitle = message == null ? <h1>Loading...</h1> : <h1>{message}</h1>;
+  const LoggedUser = userData == null ? <h1>Need to Log In</h1> : <h1>{userData.user.name}</h1>;
 
   return (
     <div className="container mx-auto mt-20">
-      <header className="flex justify-center py-5">{headerTitle}</header>
+      <div className="flex justify-center py-5">{headerTitle}</div>
+      <div className="flex justify-center py-5">{LoggedUser}</div>
       <ButtonT
         className="hover:!bg-red-600 mx-2"
         size="md"
@@ -200,6 +221,13 @@ function App() {
           className="!bg-[#cca300] hover:!bg-[#806600] mx-2"
           size="md"
           variant="primary"
+          onClick={logInUserHandler}>
+          Log In
+        </ButtonT>
+        <ButtonT
+          className="!bg-[#cca300] hover:!bg-[#806600] mx-2"
+          size="md"
+          variant="primary"
           onClick={addUserHandler}>
           Create User
         </ButtonT>
@@ -211,14 +239,14 @@ function App() {
           Create Task
         </ButtonT>
         <ButtonT
-          className="!bg-[#00cc66] hover:!bg-[#008040] mx-2"
+          className="!bg-[#00CC66] hover:!bg-[#008040] mx-2"
           size="md"
           variant="primary"
           onClick={fetchProfileHandler}>
           Get Profile
         </ButtonT>
         <ButtonT
-          className="!bg-[#00cc66] hover:!bg-[#008040] mx-2"
+          className="!bg-[#00CC66] hover:!bg-[#008040] mx-2"
           size="md"
           variant="primary"
           onClick={fetchTasksHandler}>
