@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import TaskList from './Components/TaskList';
 import Profile from './Components/Profile';
 
 import { ButtonT } from './TailwindComponents';
-import Task from './Components/Task';
 
 // import { dummyTasks, dummyUser, dummyHelloWorld } from './__mock__/data.js';
 
@@ -12,12 +11,21 @@ import Task from './Components/Task';
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
 function App() {
+  const defaultJson = `{
+    "name": "John",
+    "age": 30,
+    "pasword": "1234567890",
+    "email": "intelaki@gmail.com"
+  }`;
   const [message, setMessage] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [newUser, setNewUser] = useState(null);
   const [newTask, setNewTask] = useState(null);
+
+  const [inputValue, setInputValue] = useState(defaultJson);
+  const [jsonData, setJsonData] = useState('');
 
   useEffect(() => {
     fetchHelloWorld();
@@ -189,6 +197,22 @@ function App() {
     setUser(null);
     setNewUser(null);
     setNewTask(null);
+    setInputValue(defaultJson);
+    setJsonData('');
+  };
+
+  const handleInputChange = (event) => {
+    setInputValue(event.target.value);
+  };
+
+  const handleConvertToJson = () => {
+    try {
+      const parsedData = JSON.parse(inputValue);
+      setJsonData(JSON.stringify(parsedData, null, 2)); // Adding 2-space indentation for formatting
+      console.log(JSON.stringify(parsedData, null, 2));
+    } catch (error) {
+      setJsonData('Invalid JSON');
+    }
   };
 
   const headerTitle = message == null ? <h1>Loading...</h1> : <h1>{message}</h1>;
@@ -203,6 +227,15 @@ function App() {
         onClick={resetHandler}>
         Reset
       </ButtonT>
+      <section className="py-5">
+        <div className="flex flexi-row flex-wrap justify-between">
+          <textarea rows="8" cols="50" value={inputValue} onChange={handleInputChange} />
+          <div className="flex justify-center items-center">
+            <ButtonT onClick={handleConvertToJson}>Convert to JSON</ButtonT>
+          </div>
+          <pre>{jsonData}</pre>
+        </div>
+      </section>
       <section className="flex flex-wrap py-5">
         <ButtonT
           className="!bg-[#cca300] hover:!bg-[#806600] mx-2"
