@@ -14,9 +14,10 @@ function App() {
   const defaultJson = `{
     "name": "John",
     "age": 30,
-    "pasword": "1234567890",
-    "email": "intelaki@gmail.com"
+    "password": "1234567890",
+    "email": "John@mail.com"
   }`;
+
   const [message, setMessage] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
@@ -30,6 +31,10 @@ function App() {
   useEffect(() => {
     fetchHelloWorld();
   }, []);
+
+  useEffect(() => {
+    setJsonData('');
+  }, [inputValue]);
 
   useEffect(() => {
     if (error == null) {
@@ -123,20 +128,13 @@ function App() {
   const addUserHandler = async () => {
     setError(null);
 
-    const newUser = {
-      name: 'Bob Marley',
-      password: '1234567890',
-      age: 21,
-      email: 'userTest@gmail.com'
-    };
-
     try {
       const response = await fetch(`${baseUrl}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(newUser)
+        body: jsonData
       });
       if (!response.ok) {
         const errorMessage = await response.json();
@@ -209,7 +207,7 @@ function App() {
     try {
       const parsedData = JSON.parse(inputValue);
       setJsonData(JSON.stringify(parsedData, null, 2)); // Adding 2-space indentation for formatting
-      console.log(JSON.stringify(parsedData, null, 2));
+      console.log(JSON.parse(JSON.stringify(parsedData, null, 2)));
     } catch (error) {
       setJsonData('Invalid JSON');
     }
@@ -228,12 +226,17 @@ function App() {
         Reset
       </ButtonT>
       <section className="py-5">
-        <div className="flex flexi-row flex-wrap justify-between">
-          <textarea rows="8" cols="50" value={inputValue} onChange={handleInputChange} />
-          <div className="flex justify-center items-center">
+        <div className="flex flex-wrap justify-evenly">
+          <textarea
+            className="w-[351px] p-4"
+            rows="8"
+            value={inputValue}
+            onChange={handleInputChange}
+          />
+          <div className="flex justify-center items-center p-4">
             <ButtonT onClick={handleConvertToJson}>Convert to JSON</ButtonT>
           </div>
-          <pre>{jsonData}</pre>
+          <pre className="w-[351px] p-4">{jsonData}</pre>
         </div>
       </section>
       <section className="flex flex-wrap py-5">

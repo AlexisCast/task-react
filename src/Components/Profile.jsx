@@ -1,5 +1,5 @@
 const Profile = ({ user }) => {
-  console.log('rofile', user);
+  console.log('profile', user);
   const { _id, name, email, age } = user;
   return (
     <div className="p-5 m-6 max-w-[300px] rounded bg-slate-300	">
