@@ -1,5 +1,7 @@
 import './tailwind.css';
 
-import { Button as ButtonT } from './Button/Button'
+import { Button as ButtonT } from './Button';
+import Input from './Input';
+import PageContent from './PageContent';
 
-export { ButtonT };
+export { ButtonT, Input, PageContent };

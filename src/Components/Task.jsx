@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 const Task = ({ _id, description, completed, owner }) => {
-  console.log(_id);
-  console.log(completed);
+  console.log('Task', description);
   return (
     <li className="p-5 m-6 max-w-[250px] rounded bg-slate-300	">
       <h2>ID: {_id}</h2>

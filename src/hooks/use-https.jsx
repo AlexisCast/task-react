@@ -8,8 +8,6 @@ const useHttps = () => {
     setIsLoading(true);
     setError(null);
 
-    console.log('requestConfig');
-    console.log(requestConfig);
     try {
       const response = await fetch(requestConfig.url, {
         method: requestConfig.method ? requestConfig.method : 'GET',
@@ -25,9 +23,12 @@ const useHttps = () => {
               URL: ${response.url}`
         );
       }
-      const data = await response.json();
-      console.log(data);
-      applyData(data);
+      if (requestConfig.url.includes('users/logout')) {
+        applyData();
+      } else {
+        const data = await response.json();
+        applyData(data);
+      }
     } catch (error) {
       setError(error);
     }
